@@ -34,10 +34,10 @@ CONTINUE:
 	
 	
 	
-	CALL GETLEN ;DOS���볤��
-	CALL RAND ;��������ַ���
-	CALL TYPEIN ;�����ַ���,�س�����,�ó���ʱ
-	CALL ASK	;�Ƿ������ϰy/n,q�˳�
+	CALL GETLEN 	;DOS输入长度
+	CALL RAND 	;生成随机字符串
+	CALL TYPEIN 	;输入字符串,回车结束,得出用时
+	CALL ASK	;是否继续练习y/n,q退出
 	
 	
 BYE:
@@ -51,7 +51,7 @@ BYE:
 GETLEN PROC NEAR
 LENIN:	MOV AH,01H
 	INT 21H
-	SUB AL,30H	;AL��ų��ȵ�ʮλ
+	SUB AL,30H	;AL存放长度的十位
 	CMP AL,0
 	JL WNOTICE
 	CMP AL,9
@@ -63,12 +63,12 @@ LENIN:	MOV AH,01H
 	ADD BL,AL
 	MOV AH,01H
 	INT 21H
-	SUB AL,30H	;���ȵĸ�λ
+	SUB AL,30H	;长度的个位
 	CMP AL,0
 	JL WNOTICE
 	CMP AL,9
 	JG WNOTICE
-	ADD AL,BL	;AL��ų���
+	ADD AL,BL	;AL存放长度
 	MOV LEN,AL
     JMP BETWEEN
     
@@ -80,7 +80,7 @@ WNOTICE:
 	
 BETWEEN:
 	MOV DL,13
-	MOV AH,02H  ;�س�����
+	MOV AH,02H  	;回车换行
 	INT 21H
 	MOV DL,10
 	MOV AH,02H
@@ -96,16 +96,16 @@ RAND PROC NEAR
 	LEA SI,STR1-1
 PUTCHAR:
     	PUSH CX
-	MOV AH,0H	    ;�õ�ʱ�Ӽ�����ֵ��DX
+	MOV AH,0H	    ;得到时钟计数器值到DX
 	INT 1AH
 	POP CX
 	MOV AX,DX
 	ROR DX,CL
 	XOR AX,DX
 	AND AX,00FFH
-	MOV DL,26	    ;����0~25�����
+	MOV DL,26	    ;产生0~25随机数
 	DIV DL
-	ADD AH,41H	    ;A-Z��ASC��
+	ADD AH,41H	    ;A-Z的ASC码
 	MOV DL,AH
 	INC SI
 	MOV [SI],AH
@@ -113,7 +113,7 @@ PUTCHAR:
 	INT 21H
 	LOOP PUTCHAR
 	
-	MOV DL,13       ;�س�����
+	MOV DL,13       ;回车换行
 	MOV AH,02H
 	INT 21H
 	MOV DL,10
@@ -127,16 +127,16 @@ TYPEIN PROC NEAR
 	XOR AX,AX
 	MOV CX,0
 	MOV DX,0
-    MOV AH,2CH		    ;ȡϵͳʱ�䵽CX,DX
+    MOV AH,2CH		    ;取系统时间到CX,DX
 	INT 21H
 	PUSH CX
 	PUSH DX
-	INC BYTE PTR LEN    ;crռһ���ַ�,len+1
+	INC BYTE PTR LEN    ;cr占一个字符,len+1
 	LEA DX,LEN
 	MOV AH,0AH
 	INT 21H
 	DEC BYTE PTR LEN
-	MOV AH,2CH		    ;ȡϵͳʱ�䵽CX,DX
+	MOV AH,2CH		    ;取系统时间到CX,DX
 	INT 21H
 	PUSH CX
 	PUSH DX
@@ -153,13 +153,13 @@ COMPARE:
 	MOV AH,[SI]
 	CMP AH,[DI]
 	JNE SKIP
-	INC AL			;AL�����ͬ���ַ�����
+	INC AL			;AL存放相同的字符数量
 SKIP:	
 	ADD AL,0
 	LOOP COMPARE 
 	PUSH AX
 	
-	MOV DL,13       ;�س�����
+	MOV DL,13       ;回车换行
 	MOV AH,02H
 	INT 21H
 	MOV DL,10
@@ -169,7 +169,7 @@ SKIP:
 	LEA DX,RATE
 	MOV AH,09H
 	INT 21H
-	POP AX		;��ȷ��:��ȷ�ַ���/����
+	POP AX		;正确率:正确字符数/长度
 	AND AX,00FFH
 	MOV CL,10
 	DIV CL
@@ -193,19 +193,19 @@ SKIP:
 	MOV DL,AL
 	MOV AH,02H
 	INT 21H
-    POP AX
-    MOV DL,AH
-    MOV AH,02H
-    INT 21H
+    	POP AX
+    	MOV DL,AH
+    	MOV AH,02H
+    	INT 21H
     
-    MOV DL,' '       ;space
+    	MOV DL,' '       ;space
 	MOV AH,02H
 	INT 21H
 	    
 	LEA DX,TIME
 	MOV AH,09H
 	INT 21H
-	POP BX			;CXʱ��,DX��
+	POP BX			;CX时分,DX秒
 	POP AX
 	POP DX
 	POP CX
@@ -244,7 +244,7 @@ SUBB:
 	MOV AH,02H
 	INT 21H
 	
-	MOV DL,13       ;�س�����
+	MOV DL,13       ;回车换行
 	MOV AH,02H
 	INT 21H
 	MOV DL,10
@@ -256,7 +256,7 @@ TYPEIN ENDP
 ;-------------------------------------------------------
 ASK PROC NEAR
 AGAIN:	
-    LEA DX,CONFIRM
+    	LEA DX,CONFIRM
 	MOV AH,09H
 	INT 21H
 	
